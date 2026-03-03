@@ -45,16 +45,16 @@ export default function Home() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
             </svg>
-            Instant clipboard sharing
+            Free online notepad &amp; clipboard
           </div>
 
           <h1 className="hero-title">
-            Share text across<br />
+            Share text &amp; code across<br />
             <span className="text-gradient">any device, instantly</span>
           </h1>
 
           <p className="hero-desc">
-            Pick a unique clip name, paste your content, and access it from any browser worldwide. No sign-up required. Clips auto-expire in 24 hours.
+            A free online notepad to instantly share text, code, and notes. Paste your content, get a shareable link in seconds — no sign-up, no install. Works on every device. Auto-expires in 24 hours.
           </p>
 
           {/* Main Input Card */}
