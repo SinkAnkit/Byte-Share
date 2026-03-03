@@ -1,31 +1,56 @@
 import { Redis } from "@upstash/redis";
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "crypto";
 
 const redis = new Redis({
     url: process.env.UPSTASH_REDIS_REST_URL!,
     token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-const MAX_CLIP_SIZE = 50_000; // 50KB limit
-const TTL_SECONDS = 86_400; // 24 hours
+const MAX_CLIP_SIZE = 50_000;
+const TTL_SECONDS = 86_400;
 
 function clipKey(slug: string) {
     return `clip:${slug}`;
 }
 
-// GET — Retrieve clip content
+function hashPassword(password: string): string {
+    return createHash("sha256").update(password).digest("hex");
+}
+
+interface ClipData {
+    content: string;
+    passwordHash?: string;
+}
+
+// GET — Retrieve clip (returns protected flag, withholds content if locked)
 export async function GET(
     _request: NextRequest,
     { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
         const { slug } = await params;
-        const content = await redis.get<string>(clipKey(slug));
+        const data = await redis.get<ClipData>(clipKey(slug));
+
+        if (!data) {
+            return NextResponse.json({ slug, exists: false, content: null });
+        }
+
+        // If password-protected, don't return content
+        if (data.passwordHash) {
+            return NextResponse.json({
+                slug,
+                exists: true,
+                protected: true,
+                content: null,
+            });
+        }
 
         return NextResponse.json({
             slug,
-            content: content ?? null,
-            exists: content !== null,
+            exists: true,
+            protected: false,
+            content: data.content,
         });
     } catch (error) {
         console.error("GET clip error:", error);
@@ -36,7 +61,7 @@ export async function GET(
     }
 }
 
-// POST — Save clip content (with 24h TTL)
+// POST — Save clip or unlock a protected clip
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ slug: string }> }
@@ -44,7 +69,41 @@ export async function POST(
     try {
         const { slug } = await params;
         const body = await request.json();
-        const { content } = body;
+
+        // --- Unlock mode: verify password and return content ---
+        if (body.action === "unlock") {
+            const { password } = body;
+            if (!password) {
+                return NextResponse.json(
+                    { error: "Password required" },
+                    { status: 400 }
+                );
+            }
+
+            const data = await redis.get<ClipData>(clipKey(slug));
+            if (!data) {
+                return NextResponse.json(
+                    { error: "Clip not found" },
+                    { status: 404 }
+                );
+            }
+
+            if (!data.passwordHash || hashPassword(password) !== data.passwordHash) {
+                return NextResponse.json(
+                    { error: "Incorrect password" },
+                    { status: 403 }
+                );
+            }
+
+            return NextResponse.json({
+                slug,
+                unlocked: true,
+                content: data.content,
+            });
+        }
+
+        // --- Save mode ---
+        const { content, password } = body;
 
         if (typeof content !== "string") {
             return NextResponse.json(
@@ -60,11 +119,17 @@ export async function POST(
             );
         }
 
-        await redis.set(clipKey(slug), content, { ex: TTL_SECONDS });
+        const clipData: ClipData = { content };
+        if (password && typeof password === "string" && password.length > 0) {
+            clipData.passwordHash = hashPassword(password);
+        }
+
+        await redis.set(clipKey(slug), clipData, { ex: TTL_SECONDS });
 
         return NextResponse.json({
             slug,
             saved: true,
+            protected: !!clipData.passwordHash,
             expiresIn: TTL_SECONDS,
         });
     } catch (error) {
@@ -85,10 +150,7 @@ export async function DELETE(
         const { slug } = await params;
         await redis.del(clipKey(slug));
 
-        return NextResponse.json({
-            slug,
-            deleted: true,
-        });
+        return NextResponse.json({ slug, deleted: true });
     } catch (error) {
         console.error("DELETE clip error:", error);
         return NextResponse.json(

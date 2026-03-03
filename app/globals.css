@@ -941,6 +941,132 @@ body {
   color: var(--cyan-dim);
 }
 
+/* ===== PASSWORD / LOCK ===== */
+.protected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(245, 180, 106, 0.08);
+  color: var(--amber);
+  border: 1px solid rgba(245, 180, 106, 0.15);
+  margin-left: 0.75rem;
+  vertical-align: middle;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-badge.locked {
+  color: var(--amber);
+  background: rgba(245, 180, 106, 0.08);
+}
+
+.lock-screen {
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+
+.lock-icon {
+  color: var(--text-3);
+  margin-bottom: 1.25rem;
+  opacity: 0.6;
+}
+
+.lock-screen h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.lock-screen p {
+  font-size: 0.88rem;
+  color: var(--text-2);
+  margin-bottom: 1.5rem;
+}
+
+.lock-form {
+  display: flex;
+  gap: 0.625rem;
+  max-width: 360px;
+  margin: 0 auto;
+}
+
+.lock-input {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  color: var(--text-1);
+  font-size: 0.92rem;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.lock-input:focus {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+
+.lock-error {
+  margin-top: 0.875rem;
+  font-size: 0.82rem;
+  color: var(--rose);
+  font-weight: 500;
+}
+
+.password-save-section {
+  margin-top: 1rem;
+}
+
+.password-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--text-2);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  padding: 0.4rem 0;
+  transition: color 0.2s ease;
+}
+
+.password-toggle:hover {
+  color: var(--cyan);
+}
+
+.password-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.625rem;
+  padding: 0.8rem 1rem;
+  background: var(--bg-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  color: var(--text-1);
+  font-size: 0.88rem;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.password-input:focus {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+
+.clip-slug {
+  display: flex;
+  align-items: center;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .features-grid {
